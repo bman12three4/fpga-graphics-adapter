@@ -95,6 +95,10 @@ module fpga_graphics_adapter (
 		.q (chr_sub)
 	);
 	
+	wire [3:0] mtxt_r_pixel;
+	wire [3:0] mtxt_b_pixel;
+	wire [3:0] mtxt_g_pixel;
+	
 	mtxt_ctrl f (
 		.clk (fclock),
 		.chr_addr (screen_r_address),
@@ -103,14 +107,29 @@ module fpga_graphics_adapter (
 		.chr_sub_addr (chr_sub_addr),
 		.posx (posx),
 		.posy (posy),
-		.r_pixel (r_pixel),
-		.g_pixel (g_pixel),
-		.b_pixel (b_pixel)
+		.r_pixel (mtxt_r_pixel),
+		.g_pixel (mtxt_g_pixel),
+		.b_pixel (mtxt_b_pixel)
 	);
+	
+	wire [3:0] ctxt_r_pixel;
+	wire [3:0] ctxt_b_pixel;
+	wire [3:0] ctxt_g_pixel;
 	
 	//ctxt_ctrl g ();
 	
-	//mbmp_ctrl h ();
+	wire [3:0] lbmp_r_pixel;
+	wire [3:0] lbmp_b_pixel;
+	wire [3:0] lbmp_g_pixel;
+	
+	//lbmp_ctrl h ();
+	
+	wire [3:0] hbmp_pixel;
+	
+	//hbmp_ctrl i ();
+	assign r_pixel = (int_reg[0] == 0) ? mtxt_r_pixel : ((int_reg[0] == 1) ? ctxt_r_pixel : ((int_reg[0] == 2) ? lbmp_r_pixel : hbmp_pixel));
+	assign g_pixel = (int_reg[0] == 0) ? mtxt_g_pixel : ((int_reg[0] == 1) ? ctxt_g_pixel : ((int_reg[0] == 2) ? lbmp_g_pixel : hbmp_pixel));
+	assign b_pixel = (int_reg[0] == 0) ? mtxt_b_pixel : ((int_reg[0] == 1) ? ctxt_b_pixel : ((int_reg[0] == 2) ? lbmp_b_pixel : hbmp_pixel));
 	
 	assign r_vga_o = (h_pixel < 640) ? r_pixel : 4'b0000;
 	assign g_vga_o = (h_pixel < 640) ? b_pixel : 4'b0000;
