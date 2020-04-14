@@ -7,9 +7,7 @@ module mtxt_ctrl (
 		
 		output [15:0] chr_addr,
 		output [11:0] chr_sub_addr,
-		output [3:0] r_pixel,
-		output [3:0] g_pixel,
-		output [3:0] b_pixel
+		output [3:0] m_pixel
 	);
 	
 	(*keep*) wire [3:0] row;
@@ -27,9 +25,7 @@ module mtxt_ctrl (
 	
 	wire pixel;
 	
-	assign r_pixel = (pixel) ? 4'b1111 : 4'b0000;
-	assign g_pixel = (pixel) ? 4'b1111 : 4'b0000;
-	assign b_pixel = (pixel) ? 4'b1111 : 4'b0000;
+	assign m_pixel = (pixel) ? 4'b1111 : 4'b0000;
 	
 	assign pixel = (chr_sub & pixel_mask) >> col;
 	
