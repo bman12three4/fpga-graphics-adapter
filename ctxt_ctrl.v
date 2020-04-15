@@ -24,7 +24,6 @@ module ctxt_ctrl (
 	
 	reg sel;
 	
-	
 	assign row = posy [3:0];
 	assign col = posx [2:0];
 	assign pixel_mask = (8'b1 << col);
@@ -36,15 +35,15 @@ module ctxt_ctrl (
 	always @(posedge clk) begin
 		if (sel == 1) begin
 			sel = 0;
-			sel = 0;
-			sel = 0;
-			chr_val = scr_val;
 		end
 		else if (sel == 0) begin
 			sel = 1;
-			sel = 1;
-			sel = 1;
-			colr_val = scr_val;
+		end
+		if (sel == 0) begin
+			chr_val <= scr_val;
+		end
+		else if (sel == 1) begin
+			colr_val <= scr_val;
 		end
 	end
 	
