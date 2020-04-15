@@ -53,7 +53,7 @@ module fpga_graphics_adapter (
 	
 	// modes 0 and 1 use xy mode, modes 2 and 3 use address mode
 	assign screen_w_address [6:0] = int_reg[3][6:0];
-	assign screen_w_address [7] = int_reg[0][1] ? (int_reg[3][7]) : (int_reg[4][0]);
+	assign screen_w_address [7] = (int_reg[0] == 0) ? (int_reg[4][0]) : (int_reg[3][7]);
 	assign screen_w_address [15:8] = int_reg[0][1] ? (int_reg[4][7:0]) : (int_reg[4][7:1]);	
 	
 	assign screen_r_address = (int_reg[0] == 0) ? mtxt_scr_addr : ((int_reg[0] == 1) ? ctxt_scr_addr : ((int_reg[0] == 2) ? lbmp_scr_addr : hbmp_scr_addr));
