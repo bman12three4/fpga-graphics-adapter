@@ -36,11 +36,15 @@ module ctxt_ctrl (
 	always @(posedge clk) begin
 		if (sel == 1) begin
 			sel = 0;
-			chr_val <= scr_val;
+			sel = 0;
+			sel = 0;
+			chr_val = scr_val;
 		end
 		else if (sel == 0) begin
 			sel = 1;
-			colr_val <= scr_val;
+			sel = 1;
+			sel = 1;
+			colr_val = scr_val;
 		end
 	end
 	
