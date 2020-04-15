@@ -1,8 +1,8 @@
 import imageio
 import numpy
 
-image = imageio.imread('charset.png')
-out = open("charset.bin", "w")
+image = imageio.imread('charset_b.png')
+out = open("charset_b.bin", "w")
 
 bytelist = []
 
@@ -10,7 +10,7 @@ bytelist = []
 so it's 16 bytes, the top row of 8 down the the bottom row, then the next char
 '''
 
-for row in range(0, 10):
+for row in range(0, 23):
      for col in range(0, 10):
           for subrow in range (16):
                byte = 0
