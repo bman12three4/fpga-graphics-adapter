@@ -120,7 +120,7 @@ module fpga_graphics_adapter (
 	wire [11:0] ctxt_chr_sub_addr;
 	
 	ctxt_ctrl g (
-		.clk (fclock),
+		.clk (clk),
 		.scr_addr (ctxt_scr_addr),
 		.scr_val (screen_data),
 		.chr_sub_addr (ctxt_chr_sub_addr),
@@ -149,8 +149,8 @@ module fpga_graphics_adapter (
 	assign b_pixel = (int_reg[0] == 0) ? mtxt_pixel : ((int_reg[0] == 1) ? ctxt_b_pixel : ((int_reg[0] == 2) ? lbmp_b_pixel : hbmp_pixel));
 	
 	assign r_vga_o = (h_pixel < 640) ? r_pixel : 4'b0000;
-	assign g_vga_o = (h_pixel < 640) ? b_pixel : 4'b0000;
-	assign b_vga_o = (h_pixel < 640) ? g_pixel : 4'b0000;
+	assign g_vga_o = (h_pixel < 640) ? g_pixel : 4'b0000;
+	assign b_vga_o = (h_pixel < 640) ? b_pixel : 4'b0000;
 	
 	always @ (posedge chipclk) begin
 		curr_addr = rs;

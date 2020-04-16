@@ -32,7 +32,7 @@ module ctxt_ctrl (
 	assign scr_addr [7:1] = posx [9:3];
 	assign scr_addr [12:8] = posy [8:4];
 	
-	always @(posedge clk) begin
+	always @(negedge clk) begin
 		if (sel == 1) begin
 			sel = 0;
 		end
@@ -53,9 +53,9 @@ module ctxt_ctrl (
 	
 	assign pixel = (chr_sub & pixel_mask) >> col;
 	
-	wire [3:0] r_fgnd;
-	wire [3:0] g_fgnd;
-	wire [3:0] b_fgnd;
+	(*keep*)wire [3:0] r_fgnd;
+	(*keep*)wire [3:0] g_fgnd;
+	(*keep*)wire [3:0] b_fgnd;
 	
 	assign r_fgnd [3] = colr_val [6];
 	assign g_fgnd [3] = colr_val [5];
