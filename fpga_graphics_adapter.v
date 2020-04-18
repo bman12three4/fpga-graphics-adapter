@@ -120,7 +120,7 @@ module fpga_graphics_adapter (
 	wire [11:0] ctxt_chr_sub_addr;
 	
 	ctxt_ctrl g (
-		.clk (clk),
+		.clk (fclock),
 		.scr_addr (ctxt_scr_addr),
 		.scr_val (screen_data),
 		.chr_sub_addr (ctxt_chr_sub_addr),

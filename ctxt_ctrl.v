@@ -32,7 +32,7 @@ module ctxt_ctrl (
 	assign scr_addr [7:1] = posx [9:3];
 	assign scr_addr [12:8] = posy [8:4];
 	
-	always @(negedge clk) begin
+	always @(posedge clk) begin
 		if (sel == 1) begin
 			sel = 0;
 		end
