@@ -18,8 +18,8 @@ module mtxt_ctrl (
 	assign col = posx [2:0];
 	assign pixel_mask = (8'b1 << col);
 	
-	assign chr_addr [6:0] = posx [9:3];
-	assign chr_addr [11:7] = posy [8:4];
+	assign chr_addr [7:0] = posx [9:3];
+	assign chr_addr [12:8] = posy [8:4];
 	
 	assign chr_sub_addr = ((chr_val - 32) << 4) + row;
 	
