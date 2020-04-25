@@ -53,9 +53,9 @@ module ctxt_ctrl (
 	
 	assign pixel = (chr_sub & pixel_mask) >> col;
 	
-	wire [3:0] r_fgnd;
-	wire [3:0] g_fgnd;
-	wire [3:0] b_fgnd;
+	(*keep*)wire [3:0] r_fgnd;
+	(*keep*)wire [3:0] g_fgnd;
+	(*keep*)wire [3:0] b_fgnd;
 	
 	assign r_fgnd [3] = colr_val [6];
 	assign g_fgnd [3] = colr_val [5];

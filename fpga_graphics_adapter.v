@@ -53,8 +53,8 @@ module fpga_graphics_adapter (
 	
 	// modes 0 and 1 use xy mode, modes 2 and 3 use address mode
 	assign screen_w_address [6:0] = int_reg[3][6:0];
-	assign screen_w_address [7] = int_reg[0][1] ? (int_reg[3][7]) : (int_reg[4][0]);
-	assign screen_w_address [15:8] = int_reg[0][1] ? (int_reg[4][7:0]) : (int_reg[4][7:1]);	
+	assign screen_w_address [7] = (int_reg[0] == 0) ? (int_reg[4][0]) : (int_reg[3][7]);
+	assign screen_w_address [15:8] = (int_reg[0] == 0) ? (int_reg[4][7:1]) : (int_reg[4][7:0]);	
 	
 	assign screen_r_address = (int_reg[0] == 0) ? mtxt_scr_addr : ((int_reg[0] == 1) ? ctxt_scr_addr : ((int_reg[0] == 2) ? lbmp_scr_addr : hbmp_scr_addr));
 	assign chr_sub_addr = (int_reg[0] == 0) ? mtxt_chr_sub_addr : ((int_reg[0] == 1) ? ctxt_chr_sub_addr : ((int_reg[0] == 2) ? lbmp_chr_sub_addr : hbmp_chr_sub_addr));
@@ -149,8 +149,8 @@ module fpga_graphics_adapter (
 	assign b_pixel = (int_reg[0] == 0) ? mtxt_pixel : ((int_reg[0] == 1) ? ctxt_b_pixel : ((int_reg[0] == 2) ? lbmp_b_pixel : hbmp_pixel));
 	
 	assign r_vga_o = (h_pixel < 640) ? r_pixel : 4'b0000;
-	assign g_vga_o = (h_pixel < 640) ? b_pixel : 4'b0000;
-	assign b_vga_o = (h_pixel < 640) ? g_pixel : 4'b0000;
+	assign g_vga_o = (h_pixel < 640) ? g_pixel : 4'b0000;
+	assign b_vga_o = (h_pixel < 640) ? b_pixel : 4'b0000;
 	
 	always @ (posedge chipclk) begin
 		curr_addr = rs;
