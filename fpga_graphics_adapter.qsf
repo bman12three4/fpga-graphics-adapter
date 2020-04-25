@@ -100,11 +100,11 @@ set_global_assignment -name QIP_FILE vga_clock.qip
 set_global_assignment -name VERILOG_FILE mtxt_ctrl.v
 set_global_assignment -name QIP_FILE chr_rom.qip
 set_global_assignment -name QIP_FILE DEBUGscreen_rom.qip
-set_global_assignment -name ENABLE_SIGNALTAP OFF
+set_global_assignment -name ENABLE_SIGNALTAP ON
 set_global_assignment -name USE_SIGNALTAP_FILE output_files/stp1.stp
 set_global_assignment -name SIGNALTAP_FILE output_files/stp1.stp
 set_global_assignment -name VERILOG_FILE ctxt_ctrl.v
 set_global_assignment -name POWER_PRESET_COOLING_SOLUTION "23 MM HEAT SINK WITH 200 LFPM AIRFLOW"
 set_global_assignment -name POWER_BOARD_THERMAL_MODEL "NONE (CONSERVATIVE)"
-set_global_assignment -name VERILOG_FILE mlbmp.v
+set_global_assignment -name SLD_FILE db/stp1_auto_stripped.stp
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top

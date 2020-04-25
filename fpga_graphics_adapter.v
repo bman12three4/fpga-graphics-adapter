@@ -131,9 +131,19 @@ module fpga_graphics_adapter (
 		.b_pixel (ctxt_b_pixel)
 	);
 	
+	
 	wire [3:0] mlbmp_pixel;
 	wire [15:0] mlbmp_scr_addr;
-	//lbmp_ctrl h ();
+	
+	mlbmp_ctrl h (
+		.clk (fclock),
+		.scr_addr (mlbmp_scr_addr),
+		.val (val),
+		.posx (posx),
+		.posy (posy),
+		.m_pixel (mlbmp_pixel)	
+	
+	);
 	
 	wire [3:0] hbmp_pixel;
 	wire [15:0] hbmp_scr_addr;
