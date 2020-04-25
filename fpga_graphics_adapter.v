@@ -33,7 +33,7 @@ module fpga_graphics_adapter (
 	(*keep*) wire [11:0] chr_sub_addr;
 	
 	wire wren_screen;
-	assign wren_screen = (curr_addr == 4'b1) ? ~wren : 1'b0;
+	assign wren_screen = (curr_addr == 4'b1) ? ~wren & ~cs : 1'b0;
 	
 	(*keep*)wire [7:0] screen_data;
 
@@ -138,7 +138,7 @@ module fpga_graphics_adapter (
 	mlbmp_ctrl h (
 		.clk (fclock),
 		.scr_addr (mlbmp_scr_addr),
-		.val (val),
+		.val (screen_data),
 		.posx (posx),
 		.posy (posy),
 		.m_pixel (mlbmp_pixel)	
