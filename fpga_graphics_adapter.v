@@ -39,7 +39,7 @@ module fpga_graphics_adapter (
 
 	
 	wire chipclk;
-	assign chipclk = clk_ext1 & ~cs;
+	assign chipclk = clk & ~cs;
 	
 	wire [7:0] data_in;
 	wire [7:0] data_out;
@@ -133,7 +133,7 @@ module fpga_graphics_adapter (
 	
 	
 	wire [3:0] mlbmp_pixel;
-	wire [15:0] mlbmp_scr_addr;
+	(*keep*)wire [15:0] mlbmp_scr_addr;
 	
 	mlbmp_ctrl h (
 		.clk (fclock),
@@ -157,11 +157,11 @@ module fpga_graphics_adapter (
 	assign g_vga_o = (h_pixel < 640) ? g_pixel : 4'b0000;
 	assign b_vga_o = (h_pixel < 640) ? b_pixel : 4'b0000;
 	
-	always @ (posedge chipclk) begin
+	always @ (posedge ~cs) begin
 		curr_addr = rs;
 	end
 	
-	always @ (negedge chipclk) begin		// Main code should run here, after data has been recieved
+	always @ (posedge (~wren & ~cs & clk)) begin		// Main code should run here, after data has been recieved
 		int_reg[curr_addr] = data_in;
 	end
 

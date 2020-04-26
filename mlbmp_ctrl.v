@@ -14,14 +14,15 @@ module mlbmp_ctrl (
 	
 	assign col = posx [9:1];
 	assign row = posy [8:1];
-	assign pixel_mask = (8'd128 >> col[2:0]); // Start at msb, go to lsb so screen isn't mirrored.
+	assign pixel_mask = (8'b1 << 3'b111-col[2:0]); // Start at msb, go to lsb so screen isn't mirrored.
 	
-	assign scr_addr [7:0] = col [8:3];
+	assign scr_addr [5:0] = col [8:3];
+	assign scr_addr [7:6] = 0;
 	assign scr_addr [15:8] = row;
 	
 	wire pixel;
 	
-	assign pixel = (val & pixel_mask) >> 7-col[2:0]; //reversed as part of mirroring
+	assign pixel = (val & pixel_mask) >> 3'b111-col[2:0]; //reversed as part of mirroring
 	assign m_pixel = (pixel) ? 4'b1111 : 4'b0000;
 
 endmodule
