@@ -33,7 +33,7 @@ module fpga_graphics_adapter (
 	(*keep*) wire [11:0] chr_sub_addr;
 	
 	wire wren_screen;
-	assign wren_screen = (curr_addr == 4'b1) ? ~wren & ~cs : 1'b0;
+	assign wren_screen = (curr_addr == 4'b1) ? ~wren & ~cs & clk_ext1: 1'b0;
 	
 	(*keep*)wire [7:0] screen_data;
 
