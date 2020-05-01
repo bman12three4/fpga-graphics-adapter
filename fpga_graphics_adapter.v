@@ -39,7 +39,7 @@ module fpga_graphics_adapter (
 
 	
 	wire chipclk;
-	assign chipclk = clk & ~cs;
+	assign chipclk = clk_ext1 & ~cs;
 	
 	wire [7:0] data_in;
 	wire [7:0] data_out;
