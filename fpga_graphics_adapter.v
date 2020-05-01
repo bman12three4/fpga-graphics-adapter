@@ -27,6 +27,8 @@ module fpga_graphics_adapter (
 	
 	
 	(*keep*) wire [15:0] screen_r_address;
+	(*keep*) wire [15:0] screen_r_address_scroll;
+	(*keep*) wire [15:0] screen_r_address_no_scroll;
 	(*keep*) wire [15:0] screen_w_address;
 	
 	(*keep*) wire [7:0] chr_sub;
@@ -50,13 +52,19 @@ module fpga_graphics_adapter (
 	reg [7:0] int_reg [15:0]; // 16 8 bit registers
 	reg [3:0] curr_addr;		// Current address
 	
+	reg [7:0] scrollen = 1;
+	
 	
 	// modes 0 and 1 use xy mode, modes 2 and 3 use address mode
 	assign screen_w_address [6:0] = int_reg[3][6:0];
 	assign screen_w_address [7] = (int_reg[0] == 0) ? (int_reg[4][0]) : (int_reg[3][7]);
 	assign screen_w_address [15:8] = (int_reg[0] == 0) ? (int_reg[4][7:1]) : (int_reg[4][7:0]);	
 	
-	assign screen_r_address = (int_reg[0] == 0) ? mtxt_scr_addr : ((int_reg[0] == 1) ? ctxt_scr_addr : ((int_reg[0] == 2) ? lbmp_scr_addr : hbmp_scr_addr));
+	assign screen_r_address_scroll = (int_reg[0] == 0) ? mtxt_scr_addr_scroll : ((int_reg[0] == 1) ? ctxt_scr_addr : ((int_reg[0] == 2) ? lbmp_scr_addr : hbmp_scr_addr));
+	assign screen_r_address_no_scroll = (int_reg[0] == 0) ? mtxt_scr_addr : ((int_reg[0] == 1) ? ctxt_scr_addr : ((int_reg[0] == 2) ? lbmp_scr_addr : hbmp_scr_addr));
+	assign screen_r_address = scrollen[0] ? screen_r_address_scroll : screen_r_address_no_scroll;
+	
+	
 	assign chr_sub_addr = (int_reg[0] == 0) ? mtxt_chr_sub_addr : ((int_reg[0] == 1) ? ctxt_chr_sub_addr : ((int_reg[0] == 2) ? lbmp_chr_sub_addr : hbmp_chr_sub_addr));
 	
 	
@@ -100,11 +108,14 @@ module fpga_graphics_adapter (
 	
 	wire [3:0] mtxt_pixel;
 	wire [15:0] mtxt_scr_addr;
+	wire [15:0] mtxt_scr_addr_scroll;
 	wire [11:0] mtxt_chr_sub_addr;
 	
 	mtxt_ctrl f (
-		.clk (fclock),
+		.clk (h_sync_o),
 		.chr_addr (mtxt_scr_addr),
+		.chr_scroll_addr (mtxt_scr_addr_scroll),
+		.y_reg (int_reg[4]),
 		.chr_val (screen_data),
 		.chr_sub (chr_sub),
 		.chr_sub_addr (mtxt_chr_sub_addr),
@@ -148,9 +159,9 @@ module fpga_graphics_adapter (
 	assign g_pixel = (int_reg[0] == 0) ? mtxt_pixel : ((int_reg[0] == 1) ? ctxt_g_pixel : ((int_reg[0] == 2) ? lbmp_g_pixel : hbmp_pixel));
 	assign b_pixel = (int_reg[0] == 0) ? mtxt_pixel : ((int_reg[0] == 1) ? ctxt_b_pixel : ((int_reg[0] == 2) ? lbmp_b_pixel : hbmp_pixel));
 	
-	assign r_vga_o = (h_pixel < 640) ? r_pixel : 4'b0000;
-	assign g_vga_o = (h_pixel < 640) ? g_pixel : 4'b0000;
-	assign b_vga_o = (h_pixel < 640) ? b_pixel : 4'b0000;
+	assign r_vga_o = (h_pixel < 640 && line < 480) ? r_pixel : 4'b0000;
+	assign g_vga_o = (h_pixel < 640 && line < 480) ? g_pixel : 4'b0000;
+	assign b_vga_o = (h_pixel < 640 && line < 480) ? b_pixel : 4'b0000;
 	
 	always @ (posedge chipclk) begin
 		curr_addr = rs;
