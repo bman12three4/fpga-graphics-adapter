@@ -12,8 +12,8 @@ module mlbmp_ctrl (
 	wire [7:0] row;
 	(*keep*) wire [7:0] pixel_mask;
 	
-	assign col = posx [9:1];
-	assign row = posy [8:1];
+	assign col = posx [9:2];
+	assign row = posy [8:2];
 	assign pixel_mask = (8'b1 << col[2:0]); 
 	
 	assign scr_addr [5:0] = col [8:3];
