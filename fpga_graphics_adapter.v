@@ -33,7 +33,7 @@ module fpga_graphics_adapter (
 	(*keep*) wire [11:0] chr_sub_addr;
 	
 	wire wren_screen;
-	assign wren_screen = (curr_addr == 4'b1) ? ~wren : 1'b0;
+	assign wren_screen = (curr_addr == 4'b1) ? ~wren & ~cs & clk_ext1: 1'b0;
 	
 	(*keep*)wire [7:0] screen_data;
 
@@ -52,12 +52,11 @@ module fpga_graphics_adapter (
 	
 	
 	// modes 0 and 1 use xy mode, modes 2 and 3 use address mode
-	assign screen_w_address [6:0] = int_reg[3][6:0];
-	assign screen_w_address [7] = (int_reg[0] == 0) ? (int_reg[4][0]) : (int_reg[3][7]);
-	assign screen_w_address [15:8] = (int_reg[0] == 0) ? (int_reg[4][7:1]) : (int_reg[4][7:0]);	
+	assign screen_w_address [7:0] = int_reg[3][7:0];
+	assign screen_w_address [15:8] = (int_reg[4][7:0]);	
 	
-	assign screen_r_address = (int_reg[0] == 0) ? mtxt_scr_addr : ((int_reg[0] == 1) ? ctxt_scr_addr : ((int_reg[0] == 2) ? lbmp_scr_addr : hbmp_scr_addr));
-	assign chr_sub_addr = (int_reg[0] == 0) ? mtxt_chr_sub_addr : ((int_reg[0] == 1) ? ctxt_chr_sub_addr : ((int_reg[0] == 2) ? lbmp_chr_sub_addr : hbmp_chr_sub_addr));
+	assign screen_r_address = (int_reg[0] == 0) ? mtxt_scr_addr : ((int_reg[0] == 1) ? ctxt_scr_addr : ((int_reg[0] == 2) ? mlbmp_scr_addr : hbmp_scr_addr));
+	assign chr_sub_addr = (int_reg[0] == 0) ? mtxt_chr_sub_addr : ((int_reg[0] == 1) ? ctxt_chr_sub_addr : 0);
 	
 	
 	wire [3:0] r_pixel;
@@ -132,31 +131,37 @@ module fpga_graphics_adapter (
 		.b_pixel (ctxt_b_pixel)
 	);
 	
-	wire [3:0] lbmp_r_pixel;
-	wire [3:0] lbmp_b_pixel;
-	wire [3:0] lbmp_g_pixel;
-	wire [15:0] lbmp_scr_addr;
-	wire [11:0] lbmp_chr_sub_addr;
-	//lbmp_ctrl h ();
+	
+	wire [3:0] mlbmp_pixel;
+	(*keep*)wire [15:0] mlbmp_scr_addr;
+	
+	mlbmp_ctrl h (
+		.clk (fclock),
+		.scr_addr (mlbmp_scr_addr),
+		.val (screen_data),
+		.posx (posx),
+		.posy (posy),
+		.m_pixel (mlbmp_pixel)	
+	
+	);
 	
 	wire [3:0] hbmp_pixel;
 	wire [15:0] hbmp_scr_addr;
-	wire [11:0] hbmp_chr_sub_addr;
 	
 	//hbmp_ctrl i ();
-	assign r_pixel = (int_reg[0] == 0) ? mtxt_pixel : ((int_reg[0] == 1) ? ctxt_r_pixel : ((int_reg[0] == 2) ? lbmp_r_pixel : hbmp_pixel));
-	assign g_pixel = (int_reg[0] == 0) ? mtxt_pixel : ((int_reg[0] == 1) ? ctxt_g_pixel : ((int_reg[0] == 2) ? lbmp_g_pixel : hbmp_pixel));
-	assign b_pixel = (int_reg[0] == 0) ? mtxt_pixel : ((int_reg[0] == 1) ? ctxt_b_pixel : ((int_reg[0] == 2) ? lbmp_b_pixel : hbmp_pixel));
+	assign r_pixel = (int_reg[0] == 0) ? mtxt_pixel : ((int_reg[0] == 1) ? ctxt_r_pixel : ((int_reg[0] == 2) ? mlbmp_pixel : hbmp_pixel));
+	assign g_pixel = (int_reg[0] == 0) ? mtxt_pixel : ((int_reg[0] == 1) ? ctxt_g_pixel : ((int_reg[0] == 2) ? mlbmp_pixel : hbmp_pixel));
+	assign b_pixel = (int_reg[0] == 0) ? mtxt_pixel : ((int_reg[0] == 1) ? ctxt_b_pixel : ((int_reg[0] == 2) ? mlbmp_pixel : hbmp_pixel));
 	
 	assign r_vga_o = (h_pixel < 640) ? r_pixel : 4'b0000;
 	assign g_vga_o = (h_pixel < 640) ? g_pixel : 4'b0000;
 	assign b_vga_o = (h_pixel < 640) ? b_pixel : 4'b0000;
 	
-	always @ (posedge chipclk) begin
+	always @ (posedge ~cs) begin
 		curr_addr = rs;
 	end
 	
-	always @ (negedge chipclk) begin		// Main code should run here, after data has been recieved
+	always @ (posedge (~wren & ~cs & clk)) begin		// Main code should run here, after data has been recieved
 		int_reg[curr_addr] = data_in;
 	end
 
