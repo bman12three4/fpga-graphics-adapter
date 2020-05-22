@@ -51,11 +51,11 @@ module fpga_graphics_adapter (
 	reg [3:0] curr_addr;		// Current address
 	
 	
-	// modes 0 and 1 use xy mode, modes 2 and 3 use address mode
-	assign screen_w_address [7:0] = int_reg[3][7:0];
-	assign screen_w_address [15:8] = (int_reg[4][7:0]);	
+	// modes 0,1,2 use 8 bit x, modes 3 uses 6 bit x.
+	assign screen_w_address [7:0] = (int_reg[0] == 8'd3) ? {int_reg[4][1:0],int_reg[3][5:0]} : int_reg[3][7:0];
+	assign screen_w_address [15:8] = (int_reg[0] == 8'd3) ? int_reg[4][7:2] : int_reg[4][7:0];	
 	
-	assign screen_r_address = (int_reg[0] == 0) ? mtxt_scr_addr : ((int_reg[0] == 1) ? ctxt_scr_addr : ((int_reg[0] == 2) ? mlbmp_scr_addr : hbmp_scr_addr));
+	assign screen_r_address = (int_reg[0] == 0) ? mtxt_scr_addr : ((int_reg[0] == 1) ? ctxt_scr_addr : ((int_reg[0] == 2) ? mlbmp_scr_addr : mmbmp_scr_addr));
 	assign chr_sub_addr = (int_reg[0] == 0) ? mtxt_chr_sub_addr : ((int_reg[0] == 1) ? ctxt_chr_sub_addr : 0);
 	
 	
@@ -133,7 +133,7 @@ module fpga_graphics_adapter (
 	
 	
 	wire [3:0] mlbmp_pixel;
-	(*keep*)wire [15:0] mlbmp_scr_addr;
+	wire [15:0] mlbmp_scr_addr;
 	
 	mlbmp_ctrl h (
 		.clk (fclock),
@@ -142,6 +142,18 @@ module fpga_graphics_adapter (
 		.posx (posx),
 		.posy (posy),
 		.m_pixel (mlbmp_pixel)	
+	);
+	
+	wire [3:0] mmbmp_pixel;
+	wire [15:0] mmbmp_scr_addr;
+	
+	mmbmp_ctrl i (
+		.clk (fclock),
+		.scr_addr (mmbmp_scr_addr),
+		.val (screen_data),
+		.posx (posx),
+		.posy (posy),
+		.m_pixel (mmbmp_pixel)	
 	
 	);
 	
