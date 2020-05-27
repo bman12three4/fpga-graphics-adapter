@@ -26,9 +26,6 @@ module fpga_graphics_adapter (
 	reg [9:0] line;
 	
 	
-	(*keep*) wire [15:0] screen_r_address;
-	(*keep*) wire [15:0] screen_w_address;
-	
 	(*keep*) wire [7:0] chr_sub;
 	
 	wire wren_screen;
@@ -46,14 +43,15 @@ module fpga_graphics_adapter (
 	assign data_bi = (wren & chipclk) ? data_out : 8'bZ;
 	assign data_in = data_bi;
 
-	
+	// various mode constants  to use for the arrays
 	localparam [7:0] mtext = 8'd0;
 	localparam [7:0] ctext = 8'd1;
 	localparam [7:0] mlbmp = 8'd2;
 	localparam [7:0] mhbmp = 8'd3;
 	localparam [7:0] clbmp = 8'd4;
 	localparam [7:0] chbmp = 8'd5;
-	localparam [7:0] mtile = 8'd6;
+	localparam [7:0] mtini = 8'd6;
+	localparam [7:0] mtdrw = 8'd7;
 	
 	reg [7:0] int_reg [15:0]; // 16 8 bit registers
 	reg [3:0] curr_addr;		// Current address
@@ -66,13 +64,17 @@ module fpga_graphics_adapter (
 	wire [15:0] scr_addr [255:0];
 	wire [11:0] chr_rom_addr [255:0];
 	
+	wire [15:0] screen_w_address [255:0];
 	
-	// modes 0 and 1 use xy mode, modes 2 and 3 use address mode
-	assign screen_w_address [7:0] = int_reg[3][7:0];
-	assign screen_w_address [15:8] = (int_reg[4][7:0]);	
-	
-	//assign screen_r_address = (int_reg[0] == 0) ? mtxt_scr_addr : ((int_reg[0] == 1) ? ctxt_scr_addr : ((int_reg[0] == 2) ? mlbmp_scr_addr : hbmp_scr_addr));
-	//assign chr_sub_addr = (int_reg[0] == 0) ? mtxt_chr_sub_addr : ((int_reg[0] == 1) ? ctxt_chr_sub_addr : 0);
+	assign screen_w_address[mtext] = {int_reg[4][7:0], int_reg[3][7:0]};	//standard address model, terribly inefficient.
+	assign screen_w_address[ctext] = {int_reg[4][7:0], int_reg[3][7:0]};	//can access entire
+	assign screen_w_address[mlbmp] = {int_reg[4][7:0], int_reg[3][7:0]};	
+	assign screen_w_address[mhbmp] = {int_reg[4][7:0], int_reg[3][7:0]};	
+	assign screen_w_address[clbmp] = {int_reg[4][7:0], int_reg[3][7:0]};	
+	assign screen_w_address[chbmp] = {int_reg[4][7:0], int_reg[3][7:0]};
+	assign screen_w_address[mtini] = {1'b0, int_reg[4][6:0], int_reg[3][7:0]}; // Tile data takes up all of low ram
+	assign screen_w_address[mtdrw] = {1'b1, 5'b0, int_reg[4][3:0], int_reg[3][4:0]}; // There is less space above $8000 so the small table is stored there.
+
 	
 	
 	f_clock a (
@@ -88,20 +90,13 @@ module fpga_graphics_adapter (
 	
 	screen_ram d  (
 		.rdaddress (scr_addr[int_reg[0]]),
-		.wraddress (screen_w_address),
+		.wraddress (screen_w_address[int_reg[0]]),
 		.clock (fclock),
 		.data (int_reg[1]),
 		.wren (wren_screen),
 		.q (screen_data)
 	);
 	
-	/*
-	DEBUGscreen_rom d (
-		.clock (fclock),
-		.address (screen_r_address),
-		.q (screen_data)
-	);
-	*/
 	
 	chr_rom e (
 		.clock (fclock),
@@ -186,10 +181,15 @@ module fpga_graphics_adapter (
 	wire [3:0] mtile_pixel;
 	wire [15:0] mtile_scr_addr;
 	
-	assign r_pixel[mtile] = mtile_pixel;
-	assign g_pixel[mtile] = mtile_pixel;
-	assign b_pixel[mtile] = mtile_pixel;
-	assign scr_addr[mtile] = mtile_scr_addr;
+	assign r_pixel[mtdrw] = mtile_pixel;		// Draw tiles in draw mode
+	assign g_pixel[mtdrw] = mtile_pixel;
+	assign b_pixel[mtdrw] = mtile_pixel;
+	assign scr_addr[mtdrw] = mtile_scr_addr;
+	
+	assign r_pixel[mtini] = mtile_pixel;		// Still draw tiles in init mode.
+	assign g_pixel[mtini] = mtile_pixel;
+	assign b_pixel[mtini] = mtile_pixel;
+	assign scr_addr[mtini] = mtile_scr_addr;
 	
 	mtile_ctrl j (
 		.clk (fclock),
