@@ -57,15 +57,20 @@ module fpga_graphics_adapter (
 	reg [3:0] curr_addr;		// Current address
 	
 	
-	//256 possible modes, not all are used though
+	//256 possible values for each mode, not all are used though
 	wire [3:0] r_pixel [255:0];
 	wire [3:0] b_pixel [255:0];
 	wire [3:0] g_pixel [255:0];
 	wire [15:0] scr_addr [255:0];
 	wire [11:0] chr_rom_addr [255:0];
-	
 	wire [15:0] screen_w_address [255:0];
 	
+	
+	/* 
+	 *	These are so you can use 2 full bytes (x and y usually) but compress it down to fewer bits
+	 *	If you don't need all 16. mtdrw needs only 9 for example, so only the first few bits from each
+	 *	reg are actually used, the others we don't care about. 
+	 */
 	assign screen_w_address[mtext] = {int_reg[4][7:0], int_reg[3][7:0]};	//standard address model, terribly inefficient.
 	assign screen_w_address[ctext] = {int_reg[4][7:0], int_reg[3][7:0]};	//can access entire
 	assign screen_w_address[mlbmp] = {int_reg[4][7:0], int_reg[3][7:0]};	
@@ -104,19 +109,19 @@ module fpga_graphics_adapter (
 		.q (chr_sub)
 	);
 	
-	wire [3:0] mtxt_pixel;
-	wire [15:0] mtxt_scr_addr;
-	wire [11:0] mtxt_chr_sub_addr;
+	wire [3:0] mtxt_pixel;										// All the modes work in the same way.
+	wire [15:0] mtxt_scr_addr;									// These wires are passed through to the controller
+	wire [11:0] mtxt_chr_sub_addr;							// Only really necesary for the mono pixels though.
 	
-	assign r_pixel[mtext] = mtxt_pixel;
-	assign g_pixel[mtext] = mtxt_pixel;
-	assign b_pixel[mtext] = mtxt_pixel;
+	assign r_pixel[mtext] = mtxt_pixel;						// The wires in the main array are assigned as these
+	assign g_pixel[mtext] = mtxt_pixel;						// wires for the specific mode, so it's easy to choose 
+	assign b_pixel[mtext] = mtxt_pixel;						// which one you want. 
 	assign scr_addr[mtext] = mtxt_scr_addr;
 	assign chr_rom_addr[mtext] = mtxt_chr_sub_addr;
 	
-	mtxt_ctrl f (
-		.clk (fclock),
-		.chr_addr (mtxt_scr_addr),
+	mtxt_ctrl f (													// The controller module
+		.clk (fclock),												// The local wires are passed in but they are the same as
+		.chr_addr (mtxt_scr_addr),								// the ones from the big array.
 		.chr_val (screen_data),
 		.chr_sub (chr_sub),
 		.chr_sub_addr (mtxt_chr_sub_addr),
@@ -187,9 +192,9 @@ module fpga_graphics_adapter (
 	assign scr_addr[mtdrw] = mtile_scr_addr;
 	
 	assign r_pixel[mtini] = mtile_pixel;		// Still draw tiles in init mode.
-	assign g_pixel[mtini] = mtile_pixel;
-	assign b_pixel[mtini] = mtile_pixel;
-	assign scr_addr[mtini] = mtile_scr_addr;
+	assign g_pixel[mtini] = mtile_pixel;		// but any writes will be to tile data,
+	assign b_pixel[mtini] = mtile_pixel;		// so you can't change what tiles appear
+	assign scr_addr[mtini] = mtile_scr_addr;	// on the screen.
 	
 	mtile_ctrl j (
 		.clk (fclock),
@@ -200,7 +205,7 @@ module fpga_graphics_adapter (
 		.m_pixel (mtile_pixel)
 	);
 	
-	
+	// Get the pixels for the current mode and draw them within the frame.
 	assign r_vga_o = (h_pixel < 640) ? r_pixel[int_reg[0]] : 4'b0000;
 	assign g_vga_o = (h_pixel < 640) ? g_pixel[int_reg[0]] : 4'b0000;
 	assign b_vga_o = (h_pixel < 640) ? b_pixel[int_reg[0]] : 4'b0000;
