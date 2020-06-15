@@ -27,7 +27,6 @@ module fpga_graphics_adapter (
 	
 	
 	(*keep*) wire [15:0] screen_r_address;
-	(*keep*) wire [15:0] draw_screen_r_address;
 	(*keep*) wire [15:0] screen_w_address;
 	
 	(*keep*) wire [7:0] chr_sub;
