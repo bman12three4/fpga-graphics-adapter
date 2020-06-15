@@ -50,8 +50,6 @@ module fpga_graphics_adapter (
 	reg [7:0] int_reg [15:0]; // 16 8 bit registers
 	reg [3:0] curr_addr;		// Current address
 	
-	
-	// modes 0 and 1 use xy mode, modes 2 and 3 use address mode
 	assign screen_w_address [7:0] = int_reg[3][7:0];
 	assign screen_w_address [15:8] = (int_reg[4][7:0]);	
 	
