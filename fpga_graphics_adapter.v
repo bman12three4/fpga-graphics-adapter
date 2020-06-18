@@ -18,6 +18,7 @@ module fpga_graphics_adapter (
 	);
 	
 	wire fclock;
+	wire mclock;
 	
 	wire vga_clk;
 	reg [9:0] posx;
@@ -29,11 +30,22 @@ module fpga_graphics_adapter (
 	(*keep*) wire [15:0] screen_r_address;
 	(*keep*) wire [15:0] screen_w_address;
 	
+	(*keep*)wire [15:0] command_address;
+	wire command_wren;
+	wire command_data;
+	
+	wire wren_a;
+	
 	(*keep*) wire [7:0] chr_sub;
 	(*keep*) wire [11:0] chr_sub_addr;
 	
 	wire wren_screen;
 	assign wren_screen = (curr_addr == 4'b1) ? ~wren & ~cs & clk_ext1: 1'b0;
+	
+	wire command_request;
+	assign command_request =(curr_addr == 4'd5) ? ~wren & ~cs & clk_ext1 : 1'd0;
+	
+	(*keep*)wire command_active;
 	
 	(*keep*)wire [7:0] screen_data;
 
@@ -56,6 +68,10 @@ module fpga_graphics_adapter (
 	assign screen_r_address = (int_reg[0] == 0) ? mtxt_scr_addr : ((int_reg[0] == 1) ? ctxt_scr_addr : ((int_reg[0] == 2) ? mlbmp_scr_addr : hbmp_scr_addr));
 	assign chr_sub_addr = (int_reg[0] == 0) ? mtxt_chr_sub_addr : ((int_reg[0] == 1) ? ctxt_chr_sub_addr : 0);
 	
+	wire [15:0] address_a;
+	assign address_a = (command_active) ? command_address : screen_r_address;
+	assign wren_a = (command_active) ? command_wren : 0;
+	
 	
 	wire [3:0] r_pixel;
 	wire [3:0] g_pixel;
@@ -63,7 +79,8 @@ module fpga_graphics_adapter (
 	
 	f_clock a (
 		.inclk0 (clk),
-		.c0 (fclock)
+		.c0 (fclock),
+		.c1 (mclock)
 	);
 	
 	vga_clock b (
@@ -71,30 +88,35 @@ module fpga_graphics_adapter (
 		.c0 (vga_clk)
 	);
 	
+	commands c (
+		.clock (fclock),
+		.command (int_reg[5]),
+		.request (command_request),
+		.user_addr (screen_w_address),
+		.cmd_mem_addr (command_address),
+		.cmd_mem_data (command_data),
+		.cmd_mem_wren (command_wren),
+		.active (command_active)
+	);
 	
 	screen_ram d  (
-		.address_a (screen_r_address),
+		.address_a (address_a),
 		.address_b (screen_w_address),
 		.clock (fclock),
+		.data_a (command_data),
 		.data_b (int_reg[1]),
+		.wren_a (wren_a),
 		.wren_b (wren_screen),
 		.q_a (screen_data),
 		.q_b (data_out)
 	);
-	
-	/*
-	DEBUGscreen_rom d (
-		.clock (fclock),
-		.address (screen_r_address),
-		.q (screen_data)
-	);
-	*/
 	
 	chr_rom e (
 		.clock (fclock),
 		.address (chr_sub_addr),
 		.q (chr_sub)
 	);
+	
 	
 	wire [3:0] mtxt_pixel;
 	wire [15:0] mtxt_scr_addr;
@@ -156,12 +178,13 @@ module fpga_graphics_adapter (
 	assign g_vga_o = (h_pixel < 640) ? g_pixel : 4'b0000;
 	assign b_vga_o = (h_pixel < 640) ? b_pixel : 4'b0000;
 	
-	always @ (posedge ~cs) begin
-		curr_addr = rs;
-	end
+	//always @ (posedge ~cs) begin
+	//	curr_addr = rs;	
+	//end
 	
 	always @ (posedge clk) begin		// Main code should run here, after data has been recieved
 		if (~cs) begin
+		curr_addr = rs;
 			if (~wren) begin
 				int_reg[curr_addr] = data_in;		// Write data to register
 			end
