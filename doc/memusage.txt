@@ -1,0 +1,7 @@
+These pictures depict the screen memory in each mode. 
+Each pixel is a byte, the x axis is the low address bits and the y axis is the high 8 address bits
+
+Blue is a text byte
+Red is a color byte
+Orange is a bitmap byte
+Green is free space

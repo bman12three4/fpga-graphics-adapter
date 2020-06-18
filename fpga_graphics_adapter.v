@@ -42,7 +42,7 @@ module fpga_graphics_adapter (
 	assign chipclk = clk_ext1 & ~cs;
 	
 	wire [7:0] data_in;
-	wire [7:0] data_out;
+	(*keep*)wire [7:0] data_out;
 	
 	assign data_bi = (wren & chipclk) ? data_out : 8'bZ;
 	assign data_in = data_bi;
@@ -50,8 +50,6 @@ module fpga_graphics_adapter (
 	reg [7:0] int_reg [15:0]; // 16 8 bit registers
 	reg [3:0] curr_addr;		// Current address
 	
-	
-	// modes 0 and 1 use xy mode, modes 2 and 3 use address mode
 	assign screen_w_address [7:0] = int_reg[3][7:0];
 	assign screen_w_address [15:8] = (int_reg[4][7:0]);	
 	
@@ -75,12 +73,13 @@ module fpga_graphics_adapter (
 	
 	
 	screen_ram d  (
-		.rdaddress (screen_r_address),
-		.wraddress (screen_w_address),
+		.address_a (screen_r_address),
+		.address_b (screen_w_address),
 		.clock (fclock),
-		.data (int_reg[1]),
-		.wren (wren_screen),
-		.q (screen_data)
+		.data_b (int_reg[1]),
+		.wren_b (wren_screen),
+		.q_a (screen_data),
+		.q_b (data_out)
 	);
 	
 	/*
@@ -161,8 +160,12 @@ module fpga_graphics_adapter (
 		curr_addr = rs;
 	end
 	
-	always @ (posedge (~wren & ~cs & clk)) begin		// Main code should run here, after data has been recieved
-		int_reg[curr_addr] = data_in;
+	always @ (posedge clk) begin		// Main code should run here, after data has been recieved
+		if (~cs) begin
+			if (~wren) begin
+				int_reg[curr_addr] = data_in;		// Write data to register
+			end
+		end
 	end
 
 	always @(posedge vga_clk) begin
