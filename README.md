@@ -11,6 +11,7 @@ Multi-mode graphics adapter for 8 bit computers using a Cyclone 3 FPGA.
 
 
 Registers:
+
 | Register | Name | Description |
 | ------ | ------ | ------ |
 | 0 | Mode | Graphics mode. See above. |
@@ -22,6 +23,7 @@ Registers:
 
 
 Commands:
+
 | Command | Name | Description |
 | ------ | ------ | ------ |
 | 0 | No Command | No command |
