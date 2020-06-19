@@ -43,7 +43,7 @@ module fpga_graphics_adapter (
 	assign wren_screen = (curr_addr == 4'b1) ? ~wren & ~cs & clk_ext1: 1'b0;
 	
 	wire command_request;
-	assign command_request =(curr_addr == 4'd5) ? ~wren & ~cs & clk_ext1 : 1'd0;
+	assign command_request =(curr_addr == 4'd5) ? ~wren & ~cs & clk_ext1 & ~command_active : 1'd0;	// Don't overlap commands
 	
 	(*keep*)wire command_active;
 	
@@ -89,7 +89,7 @@ module fpga_graphics_adapter (
 	);
 	
 	commands c (
-		.clock (fclock),
+		.clock (mclock),
 		.command (int_reg[5]),
 		.request (command_request),
 		.user_addr (screen_w_address),
