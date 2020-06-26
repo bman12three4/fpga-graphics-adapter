@@ -8,6 +8,10 @@ Multi-mode graphics adapter for 8 bit computers using a Cyclone 3 FPGA.
 | 1 | Color Text | 80x30 |
 | 2 | Lowres Mono Bitmap | 160x120 |
 | 3 | Medres Mono Bitmap | 320x240 |
+| 4 | (WIP) Hires Mono Bitmap | 640x480 |
+| 5 | Lowres Color Bitmap | 160x120 |
+| 6 | (WIP) Medres Color Bitmap | 320x240 |
+
 
 
 Registers:
