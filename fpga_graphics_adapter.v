@@ -65,7 +65,7 @@ module fpga_graphics_adapter (
 	assign screen_w_address [7:0] = int_reg[3][7:0];
 	assign screen_w_address [15:8] = (int_reg[4][7:0]);	
 	
-	assign screen_r_address = (int_reg[0] == 0) ? mtxt_scr_addr : ((int_reg[0] == 1) ? ctxt_scr_addr : ((int_reg[0] == 2) ? mlbmp_scr_addr : mmbmp_scr_addr));
+	assign screen_r_address = (int_reg[0] == 0) ? mtxt_scr_addr : ((int_reg[0] == 1) ? ctxt_scr_addr : ((int_reg[0] == 2) ? mlbmp_scr_addr : ((int_reg[0] == 3) ? mmbmp_scr_addr : ((int_reg[0] == 4) ? mhbmp_scr_addr : ((int_reg[0] == 5) ? clbmp_scr_addr : cmbmp_scr_addr)))));
 	assign chr_sub_addr = (int_reg[0] == 0) ? mtxt_chr_sub_addr : ((int_reg[0] == 1) ? ctxt_chr_sub_addr : 0);
 	
 	wire [15:0] address_a;
@@ -180,21 +180,44 @@ module fpga_graphics_adapter (
 	
 	);
 	
-	wire [3:0] hbmp_pixel;
-	wire [15:0] hbmp_scr_addr;
+	wire [3:0] mhbmp_pixel;
+	wire [15:0] mhbmp_scr_addr;
 	
 	//hbmp_ctrl j ();
-	assign r_pixel = (int_reg[0] == 0) ? mtxt_pixel : ((int_reg[0] == 1) ? ctxt_r_pixel : ((int_reg[0] == 2) ? mlbmp_pixel : mmbmp_pixel));
-	assign g_pixel = (int_reg[0] == 0) ? mtxt_pixel : ((int_reg[0] == 1) ? ctxt_g_pixel : ((int_reg[0] == 2) ? mlbmp_pixel : mmbmp_pixel));
-	assign b_pixel = (int_reg[0] == 0) ? mtxt_pixel : ((int_reg[0] == 1) ? ctxt_b_pixel : ((int_reg[0] == 2) ? mlbmp_pixel : mmbmp_pixel));
+	
+	
+	wire [3:0] clbmp_r_pixel;
+	wire [3:0] clbmp_g_pixel;
+	wire [3:0] clbmp_b_pixel;
+	wire [15:0] clbmp_scr_addr;
+	
+	clbmp_ctrl k (
+		.clk (fclock),
+		.scr_addr (clbmp_scr_addr),
+		.scr_val (screen_data),
+		.posx (posx),
+		.posy (posy),
+		.r_pixel (clbmp_r_pixel),
+		.g_pixel (clbmp_g_pixel),
+		.b_pixel (clbmp_b_pixel),
+	);
+	
+	
+	wire [3:0] cmbmp_r_pixel;
+	wire [3:0] cmbmp_g_pixel;
+	wire [3:0] cmbmp_b_pixel;
+	wire [15:0] cmbmp_scr_addr;
+	
+	//cmbmp_ctrl l ();
+	
+	assign r_pixel = (int_reg[0] == 0) ? mtxt_pixel : ((int_reg[0] == 1) ? ctxt_r_pixel : ((int_reg[0] == 2) ? mlbmp_pixel : ((int_reg[0] == 3) ? mmbmp_pixel : ((int_reg[0] == 4) ? mhbmp_pixel : ((int_reg[0] == 5) ? clbmp_r_pixel : cmbmp_r_pixel)))));
+	assign g_pixel = (int_reg[0] == 0) ? mtxt_pixel : ((int_reg[0] == 1) ? ctxt_g_pixel : ((int_reg[0] == 2) ? mlbmp_pixel : ((int_reg[0] == 3) ? mmbmp_pixel : ((int_reg[0] == 4) ? mhbmp_pixel : ((int_reg[0] == 5) ? clbmp_g_pixel : cmbmp_g_pixel)))));
+	assign b_pixel = (int_reg[0] == 0) ? mtxt_pixel : ((int_reg[0] == 1) ? ctxt_b_pixel : ((int_reg[0] == 2) ? mlbmp_pixel : ((int_reg[0] == 3) ? mmbmp_pixel : ((int_reg[0] == 4) ? mhbmp_pixel : ((int_reg[0] == 5) ? clbmp_b_pixel : cmbmp_b_pixel)))));
 	
 	assign r_vga_o = (h_pixel < 640) ? r_pixel : 4'b0000;
 	assign g_vga_o = (h_pixel < 640) ? g_pixel : 4'b0000;
 	assign b_vga_o = (h_pixel < 640) ? b_pixel : 4'b0000;
 	
-	//always @ (posedge ~cs) begin
-	//	curr_addr = rs;	
-	//end
 	
 	always @ (posedge clk) begin		// Main code should run here, after data has been recieved
 		if (~cs) begin

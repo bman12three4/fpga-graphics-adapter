@@ -109,4 +109,5 @@ set_global_assignment -name VERILOG_FILE ctxt_ctrl.v
 set_global_assignment -name RESERVE_ALL_UNUSED_PINS_WEAK_PULLUP "AS INPUT TRI-STATED"
 set_global_assignment -name VERILOG_FILE commands.v
 set_global_assignment -name VERILOG_FILE mmbmp_ctrl.v
+set_global_assignment -name VERILOG_FILE clbmp_ctrl.v
 set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
