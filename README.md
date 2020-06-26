@@ -3,7 +3,8 @@
 Multi-mode graphics adapter for 8 bit computers using a Cyclone 3 FPGA.
 
 
-##Modes
+## Modes
+
 | Mode | Type | Resolution |
 | ------ | ------ | ------ |
 | 1 | Mono Text | 80x30 |
@@ -49,7 +50,7 @@ Medres Color Bitmap (WIP)
 * Color (see color) value is written first
 * 8 pixels, LSB to MSB, are written after.
 
-##Registers:
+## Registers:
 
 | Register | Name | Description |
 | ------ | ------ | ------ |
@@ -61,7 +62,7 @@ Medres Color Bitmap (WIP)
 | 5 | Command | Command to be executed. Excecuted immediately. |
 
 
-##Commands:
+## Commands:
 
 | Command | Name | Description |
 | ------ | ------ | ------ |
