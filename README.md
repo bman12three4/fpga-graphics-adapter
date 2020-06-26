@@ -31,5 +31,5 @@ Commands:
 | 2 | Clear part | Clears memory from 0 to address in 3,4 (WIP) |
 
 Data written to register 1 is immediately written to screen memory at the address
-in registers 2 and 3. When writing data, make sure the address is set before you
+in registers 3 and 4. When writing data, make sure the address is set before you
 write the data. Commands work the same way with register 5. 
