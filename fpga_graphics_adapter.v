@@ -88,6 +88,7 @@ module fpga_graphics_adapter (
 		.c0 (vga_clk)
 	);
 	
+	/*
 	commands c (
 		.clock (mclock),
 		.command (int_reg[5]),
@@ -98,6 +99,7 @@ module fpga_graphics_adapter (
 		.cmd_mem_wren (command_wren),
 		.active (command_active)
 	);
+	*/
 	
 	screen_ram d  (
 		.address_a (address_a),
@@ -170,6 +172,7 @@ module fpga_graphics_adapter (
 	wire [3:0] mmbmp_pixel;
 	(*keep*)wire [15:0] mmbmp_scr_addr;
 	
+	/*
 	mmbmp_ctrl i (
 		.clk (fclock),
 		.scr_addr (mmbmp_scr_addr),
@@ -179,6 +182,7 @@ module fpga_graphics_adapter (
 		.m_pixel (mmbmp_pixel)	
 	
 	);
+	*/
 	
 	wire [3:0] mhbmp_pixel;
 	wire [15:0] mhbmp_scr_addr;
@@ -190,7 +194,7 @@ module fpga_graphics_adapter (
 	wire [3:0] clbmp_g_pixel;
 	wire [3:0] clbmp_b_pixel;
 	wire [15:0] clbmp_scr_addr;
-	
+	/*
 	clbmp_ctrl k (
 		.clk (fclock),
 		.scr_addr (clbmp_scr_addr),
@@ -201,7 +205,7 @@ module fpga_graphics_adapter (
 		.g_pixel (clbmp_g_pixel),
 		.b_pixel (clbmp_b_pixel),
 	);
-	
+	*/
 	
 	wire [3:0] cmbmp_r_pixel;
 	wire [3:0] cmbmp_g_pixel;
